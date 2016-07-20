@@ -1,5 +1,5 @@
-DROP VIEW IF EXISTS 'view_correlations';
-CREATE VIEW 'view_correlations' AS
+DROP VIEW IF EXISTS "view_correlations";
+CREATE VIEW "view_correlations" AS
 SELECT
   plates.description          AS g_plate,
   wells.description           AS g_well,
@@ -12,7 +12,7 @@ SELECT
   quality.count_debris        AS q_debris,
   quality.count_low_intensity AS q_low_intensity,
   correlations.coefficient    AS m_correlations_coefficient
-FROM plates
+FROM plates, wells, images, quality, objects, matches
 INNER JOIN wells                 ON wells.plate_id              = plates.id
 INNER JOIN images                ON images.well_id              = wells.id
 INNER JOIN quality               ON quality.image_id            = images.id
@@ -24,8 +24,8 @@ INNER JOIN channels as channels2 ON correlations.independent_id = channels2.id
 INNER JOIN correlations          ON correlations.match_id       = matches.id
 ;
 
-DROP VIEW IF EXISTS 'view_edges';
-CREATE VIEW 'view_edges' AS
+DROP VIEW IF EXISTS "view_edges";
+CREATE VIEW "view_edges" AS
  SELECT
   plates.description          AS g_plate,
   wells.description           AS g_well,
@@ -52,8 +52,8 @@ INNER JOIN channels ON edges.channel_id   = channels.id
 INNER JOIN edges    ON edges.match_id     = matches.id
 ;
 
-DROP VIEW IF EXISTS 'view_intensities';
-CREATE VIEW 'view_intensities' AS
+DROP VIEW IF EXISTS "view_intensities";
+CREATE VIEW "view_intensities" AS
 SELECT
 	plates.description                    AS g_plate,
 	wells.description                     AS g_well,
@@ -84,8 +84,8 @@ INNER JOIN channels     ON intensities.channel_id = channels.id
 INNER JOIN intensities  ON intensities.match_id   = matches.id
 ;
 
-DROP VIEW IF EXISTS 'view_locations';
-CREATE VIEW 'view_locations' AS
+DROP VIEW IF EXISTS "view_locations";
+CREATE VIEW "view_locations" AS
 SELECT
   plates.description               AS g_plate,
   wells.description                AS g_well,
@@ -113,8 +113,8 @@ INNER JOIN coordinates as center_mass_intensity ON locations.center_mass_intensi
 INNER JOIN coordinates as max_intensity         ON locations.max_intensity_id         = max_intensity.id
 ;
 
-DROP VIEW IF EXISTS 'view_moments';
-CREATE VIEW 'view_moments' AS
+DROP VIEW IF EXISTS "view_moments";
+CREATE VIEW "view_moments" AS
 SELECT
   plates.description          AS g_plate,
   wells.description           AS g_well,
@@ -138,8 +138,8 @@ INNER JOIN shapes   ON matches.shape_id   = shapes.id
 INNER JOIN moments  ON moments.shape_id   = shapes.id
 ;
 
-DROP VIEW IF EXISTS 'view_neighborhoods';
-CREATE VIEW 'view_neighborhoods' AS
+DROP VIEW IF EXISTS "view_neighborhoods";
+CREATE VIEW "view_neighborhoods" AS
 SELECT
   plates.description                                  AS g_plate,
   wells.description                                   AS g_well,
@@ -171,8 +171,8 @@ INNER JOIN patterns      ON matches.pattern_id      = patterns.id
 INNER JOIN neighborhoods ON matches.neighborhood_id = neighborhoods.id
 ;
 
-DROP VIEW IF EXISTS 'view_radial_distributions';
-CREATE VIEW 'view_radial_distributions' AS
+DROP VIEW IF EXISTS "view_radial_distributions";
+CREATE VIEW "view_radial_distributions" AS
 SELECT
   plates.description               AS g_plate,
   wells.description                AS g_well,
@@ -198,8 +198,8 @@ INNER JOIN channels             ON radial_distributions.channel_id = channels.id
 INNER JOIN radial_distributions ON radial_distributions.match_id   = matches.id
 ;
 
-DROP VIEW IF EXISTS 'view_shapes';
-CREATE VIEW 'view_shapes' AS
+DROP VIEW IF EXISTS "view_shapes";
+CREATE VIEW "view_shapes" AS
 SELECT
   plates.description          AS g_plate,
   wells.description           AS g_well,
@@ -212,21 +212,21 @@ SELECT
   center.abscissa             AS m_shapes_center_x,
   center.ordinate             AS m_shapes_center_y,
 	shapes.area                 AS m_shapes_area,
-  shapes.compactness          AS m_shapes_compactness,   
-  shapes.eccentricity         AS m_shapes_eccentricity,      
-  shapes.euler_number         AS m_shapes_euler_number,     
-  shapes.extent               AS m_shapes_extent,     
+  shapes.compactness          AS m_shapes_compactness,
+  shapes.eccentricity         AS m_shapes_eccentricity,
+  shapes.euler_number         AS m_shapes_euler_number,
+  shapes.extent               AS m_shapes_extent,
   shapes.form_factor          AS m_shapes_form_factor,
-  shapes.major_axis_length    AS m_shapes_major_axis_length, 
+  shapes.major_axis_length    AS m_shapes_major_axis_length,
   shapes.max_feret_diameter   AS m_shapes_max_feret_diameter,
   shapes.maximum_radius       AS m_shapes_maximum_radius,
-  shapes.mean_radius          AS m_shapes_mean_radius,   
-  shapes.median_radius        AS m_shapes_median_radius,     
+  shapes.mean_radius          AS m_shapes_mean_radius,
+  shapes.median_radius        AS m_shapes_median_radius,
   shapes.min_feret_diameter   AS m_shapes_min_feret_diameter,
   shapes.minor_axis_length    AS m_shapes_minor_axis_length,
   shapes.orientation          AS m_shapes_orientation,
-  shapes.perimeter            AS m_shapes_perimeter,      
-  shapes.solidity             AS m_shapes_solidity        
+  shapes.perimeter            AS m_shapes_perimeter,
+  shapes.solidity             AS m_shapes_solidity
 FROM plates
 INNER JOIN wells                 ON wells.plate_id     = plates.id
 INNER JOIN images                ON images.well_id     = wells.id
@@ -238,8 +238,8 @@ INNER JOIN shapes                ON matches.shape_id   = shapes.id
 INNER JOIN coordinates as center ON shapes.center_id   = center.id
 ;
 
-DROP VIEW IF EXISTS 'view_textures';
-CREATE VIEW 'view_textures' AS
+DROP VIEW IF EXISTS "view_textures";
+CREATE VIEW "view_textures" AS
 SELECT
   plates.description                 AS g_plate,
   wells.description                  AS g_well,
@@ -251,21 +251,21 @@ SELECT
   quality.count_debris               AS q_debris,
   quality.count_low_intensity        AS q_low_intensity,
   textures.scale                     AS p_textures_scale,
-  textures.angular_second_moment     AS m_textures_angular_second_moment,           
+  textures.angular_second_moment     AS m_textures_angular_second_moment,
   textures.contrast                  AS m_textures_contrast,
-  textures.correlation               AS m_textures_correlation,           
+  textures.correlation               AS m_textures_correlation,
   textures.difference_entropy        AS m_textures_difference_entropy,
-  textures.difference_variance       AS m_textures_difference_variance,           
+  textures.difference_variance       AS m_textures_difference_variance,
   textures.entropy                   AS m_textures_entropy,
-  textures.gabor                     AS m_textures_gabor,        
+  textures.gabor                     AS m_textures_gabor,
   textures.info_meas_1               AS m_textures_info_meas_1,
-  textures.info_meas_2               AS m_textures_info_meas_2,           
+  textures.info_meas_2               AS m_textures_info_meas_2,
   textures.inverse_difference_moment AS m_textures_inverse_difference_moment,
   textures.sum_average               AS m_textures_sum_average,
-  textures.sum_entropy               AS m_textures_sum_entropy,          
-  textures.sum_variance              AS m_textures_sum_variance,           
-  textures.variance                  AS m_textures_variance  
-FROM plates                                         
+  textures.sum_entropy               AS m_textures_sum_entropy,
+  textures.sum_variance              AS m_textures_sum_variance,
+  textures.variance                  AS m_textures_variance
+FROM plates
 INNER JOIN wells    ON wells.plate_id      = plates.id
 INNER JOIN images   ON images.well_id      = wells.id
 INNER JOIN quality  ON quality.image_id    = images.id
