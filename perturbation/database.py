@@ -28,6 +28,7 @@ scoped_session = sqlalchemy.orm.scoped_session(Session)
 
 # initialize lists that will be used to store tables
 channels = []
+tmp_channels = []
 coordinates = []
 correlations = []
 edges = []
@@ -54,7 +55,7 @@ def setup(database):
     """
     global engine
 
-    engine = sqlalchemy.create_engine("sqlite:///{}".format(os.path.realpath(database)))
+    engine = sqlalchemy.create_engine(database)
 
     scoped_session.remove()
 
@@ -69,19 +70,26 @@ def seed(input, output, sqlfile):
     """Call functions to create backend
 
     :param input: top-level directory containing sub-directories, each of which have an image.csv and object.csv
-    :param output: name of SQLite databse
+    :param output: connection string to database
     :param sqlfile: SQL file to be executed on the backend database after it is created
     :return:
     """
+
     setup(output)
 
     logger.debug('Parsing SQL file')
 
-    create_views(sqlfile)
+    #create_views(sqlfile)
 
     logger.debug('Parsing csvs')
 
+    #engine.execute('ALTER TABLE correlations DISABLE trigger ALL;')
+    #engine.execute('ALTER TABLE edges DISABLE trigger ALL;')
+
     seed_plate(input)
+
+    #engine.execute('ALTER TABLE correlations ENABLE trigger ALL;')
+    #engine.execute('ALTER TABLE edges ENABLE trigger ALL;')
 
 
 def seed_plate(directories):
@@ -98,6 +106,8 @@ def seed_plate(directories):
         except OSError:
             continue
 
+        tmp_channels = []
+
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
         # TODO: 'Metadata_Barcode' should be gotten from a config file
@@ -106,10 +116,10 @@ def seed_plate(directories):
         # Populate plates[], wells[], images[], qualities[]
         # This pre-computes UUIDs so that we don't need to look up the db
         # (which will be slow)
-        
+
         create_plates(data, digest, plate_descriptions)
 
-        # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern) 
+        # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
         data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
 
         def get_object_numbers(s):
@@ -137,6 +147,7 @@ def seed_plate(directories):
 
         columns = data.columns
 
+
         find_channels(columns)
 
         correlation_columns = find_correlation_columns(columns)
@@ -147,10 +158,12 @@ def seed_plate(directories):
 
         moments = find_moments(columns)
 
+        __save__(perturbation.models.Channel, tmp_channels)
+
         # Populate all the tables
         create_patterns(correlation_columns, counts, digest, directory, moments, patterns, scales)
 
-    __save__(perturbation.models.Channel, channels)
+
 
     __save__(perturbation.models.Plate, plates)
 
@@ -267,6 +280,7 @@ def find_channels(columns):
             channel = create_channel(channel_description)
 
             channels.append(channel)
+            tmp_channels.append(channel)
 
 
 def find_correlation_columns(columns):
