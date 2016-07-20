@@ -48,7 +48,8 @@ setuptools.setup(
         'pandas',
         'pytest',
         'sqlalchemy',
-        'sqlparse'
+        'sqlparse',
+        'psycopg2'
     ],
     entry_points={
         'console_scripts': [
